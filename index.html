@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>千住Meetup! — 北千住をエンジニアの聖地に</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Noto+Sans+JP:wght@400;700;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --card-bg: #111111;
+      --accent: #adff2f; /* ネオングリーン */
+      --accent-pink: #ff007a;
+      --accent-blue: #00f2ff;
+      --text: #ffffff;
+      --text-dim: #a0a0a0;
+      --border: rgba(255, 255, 255, 0.1);
+      --font-main: 'Noto Sans JP', sans-serif;
+      --font-heading: 'Syne', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* 背景の装飾 */
+    .bg-grid {
+      position: fixed; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -1;
+      mask-image: radial-gradient(circle at 50% 50%, black, transparent 80%);
+    }
+
+    /* 言語切替 */
+    .lang-switcher {
+      position: fixed; top: 20px; right: 20px; z-index: 1000;
+      display: flex; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+      padding: 4px; border-radius: 12px; border: 1px solid var(--border);
+    }
+    .lang-btn {
+      padding: 6px 12px; border: none; background: transparent; color: var(--text-dim);
+      font-family: var(--font-mono); font-size: 12px; cursor: pointer; border-radius: 8px; transition: 0.2s;
+    }
+    .lang-btn.active { background: var(--accent); color: #000; font-weight: bold; }
+
+    /* ナビゲーション */
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 40px; position: sticky; top: 0; z-index: 1000;
+      background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(10px);
+    }
+    .logo { font-family: var(--font-heading); font-size: 24px; font-weight: 800; letter-spacing: -1px; }
+    .logo span { color: var(--accent); }
+
+    /* HERO SECTION */
+    .hero {
+      height: 90vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center; padding: 0 20px; position: relative;
+    }
+    .hero-badge {
+      font-family: var(--font-mono); background: var(--accent-pink); color: white;
+      padding: 4px 12px; border-radius: 4px; font-size: 14px; margin-bottom: 20px;
+      transform: rotate(-2deg);
+    }
+    .hero h1 {
+      font-family: var(--font-heading); font-size: clamp(3rem, 10vw, 8rem);
+      line-height: 0.9; text-transform: uppercase; margin-bottom: 20px;
+    }
+    .hero h1 .outline {
+      color: transparent; -webkit-text-stroke: 1px var(--text);
+    }
+    .hero p { max-width: 600px; color: var(--text-dim); font-size: 1.1rem; margin-bottom: 40px; }
+
+    .cta-button {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent); color: #000; padding: 18px 40px;
+      border-radius: 50px; text-decoration: none; font-weight: 900;
+      font-size: 1.2rem; transition: 0.3s; box-shadow: 0 0 30px rgba(173, 255, 47, 0.3);
+    }
+    .cta-button:hover { transform: scale(1.05) rotate(1deg); box-shadow: 0 0 50px rgba(173, 255, 47, 0.5); }
+
+    /* MARQUEE */
+    .marquee {
+      background: var(--accent); color: #000; padding: 10px 0;
+      font-family: var(--font-mono); font-weight: 900; overflow: hidden;
+      white-space: nowrap; display: flex; transform: rotate(-1deg);
+      margin: 50px 0;
+    }
+    .marquee-content {
+      display: inline-block; animation: marquee 20s linear infinite;
+      font-size: 20px;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* BENTO GRID AREA */
+    .section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, 300px);
+      gap: 20px;
+    }
+    .bento-item {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 24px; padding: 30px; position: relative;
+      overflow: hidden; transition: 0.3s;
+    }
+    .bento-item:hover { border-color: var(--accent); transform: translateY(-5px); }
+    .bento-item h3 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 10px; }
+    .bento-item p { color: var(--text-dim); font-size: 0.95rem; }
+
+    /* 特徴的なグリッドサイズ */
+    .col-2 { grid-column: span 2; }
+    .row-2 { grid-row: span 2; }
+
+    .icon-box { font-size: 40px; margin-bottom: 20px; }
+    .stat-val { font-family: var(--font-heading); font-size: 4rem; color: var(--accent); line-height: 1; }
+
+    /* SCHEDULE TIMELINE */
+    .timeline { margin-top: 40px; }
+    .time-card {
+      display: flex; align-items: center; gap: 20px; padding: 20px;
+      border-bottom: 1px solid var(--border); transition: 0.3s;
+    }
+    .time-card:hover { background: rgba(255,255,255,0.05); padding-left: 30px; }
+    .time-val { font-family: var(--font-mono); color: var(--accent); font-size: 1.2rem; min-width: 80px; }
+
+    /* STACK ICONS */
+    .stacks { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .stack-tag {
+      background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 6px;
+      font-family: var(--font-mono); font-size: 12px; border: 1px solid var(--border);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 100px 20px; border-top: 1px solid var(--border);
+      margin-top: 100px;
+    }
+
+    @media (max-width: 900px) {
+      .bento-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto; }
+      .col-2 { grid-column: span 2; }
+      .hero h1 { font-size: 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <nav>
+    <div class="logo">SENJU<span>MEETUP</span>!</div>
+    <div style="font-family: var(--font-mono); font-size: 12px; color: var(--accent);  padding-right: 70px;">@KITASENJU_STATION</div>
+  </nav>
+  <div class="lang-switcher">
+    <button class="lang-btn" data-lang="ja" onclick="switchLang('ja')">JP</button>
+    <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+  </div>
+
+  <section class="hero">
+    <div class="hero-badge" id="hero-badge">Next: Coming Soon!</div>
+    <h1>
+      <span class="outline">KITASENJU</span><br>
+      <span>ENGINEER</span><br>
+      <span class="outline">COMMUNITY</span>
+    </h1>
+    <p id="hero-desc">北千住を拠点に、ゆるく強く繋がる場所 -- 作業・雑談・酒、なんでもありのエンジニアの溜まり場。</p>
+    <a href="https://kitasenju-verystrong.connpass.com" target="_blank" class="cta-button">
+      <span id="cta-text">connpassで参加する</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </section>
+
+  <div class="marquee">
+    <div class="marquee-content">
+      CODE / CHAT / DRINK / STUDY / BEER / NETWORKING / LT / KITASENJU / RELAX / NO PRESSURE / CODE / CHAT / DRINK / STUDY / BEER / NETWORKING / LT / KITASENJU / RELAX / NO PRESSURE / 
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="bento-grid">
+      <!-- 1: About -->
+      <div class="bento-item col-2">
+        <div class="icon-box">🍵</div>
+        <h3 id="b1-title">ゆるい、が正義</h3>
+        <p id="b1-desc">難しい上下関係やプレッシャーはゼロ。ノートPCを持ってきて作業するもよし、隣の人と技術談義に花を咲かせるもよし。</p>
+      </div>
+      
+      <!-- 2: Stats -->
+      <div class="bento-item">
+        <h3 id="b2-title">参加費</h3>
+        <div class="stat-val" id="b2-val">¥0</div>
+        <p id="b2-desc">※ドリンク代のみ。HUBやカフェの実費だけ持ってお越しください。</p>
+      </div>
+
+      <!-- 3: Foreigner OK -->
+      <div class="bento-item">
+        <div class="icon-box">🌍</div>
+        <h3 id="b3-title">Global</h3>
+        <p id="b3-desc">English / 中文 OK! 外国人エンジニアも歓迎です。</p>
+      </div>
+
+      <!-- 4: Skill Tags -->
+      <div class="bento-item col-2 row-2">
+        <div class="icon-box">🚀</div>
+        <h3 id="b4-title">技術スタック</h3>
+        <p id="b4-desc">特定の言語に縛られません。最近のトレンドから枯れた技術まで。</p>
+        <div class="stacks">
+          <span class="stack-tag">React / Next.js</span>
+          <span class="stack-tag">Go / Rust</span>
+          <span class="stack-tag">Python (AI)</span>
+          <span class="stack-tag">TypeScript</span>
+          <span class="stack-tag">AWS / GCP</span>
+          <span class="stack-tag">Freelance</span>
+          <span class="stack-tag">Career talk</span>
+          <span class="stack-tag">Beer Design</span>
+        </div>
+      </div>
+
+      <!-- 5: Location -->
+      <div class="bento-item">
+        <h3 id="b5-title">拠点</h3>
+        <p id="b5-desc">北千住駅周辺（HUB、コワーキング、カフェなど回によって変動）</p>
+      </div>
+
+      <!-- 6: Join -->
+      <div class="bento-item">
+        <h3 id="b6-title">歓迎</h3>
+        <p id="b6-desc">初心者・学生・ベテラン、誰でも大歓迎！</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 style="font-family: var(--font-heading); font-size: 3rem; margin-bottom: 40px;">FLOW</h2>
+    <div class="timeline" id="timeline">
+      <!-- JSで挿入 -->
+    </div>
+  </section>
+
+  <footer>
+    <div class="logo" style="margin-bottom: 20px;">SENJU<span>MEETUP</span></div>
+    <p style="color: var(--text-dim); font-family: var(--font-mono);">Keep Kitasenju Strong.</p>
+  </footer>
+</body>
+</html>
+
+<script>
+  const content = {
+    ja: {
+      heroBadge: "🟢 北千住エンジニア・コミュニティ",
+      heroDesc: "北千住を拠点に、ゆるく強く繋がる場所 -- 作業・雑談・酒、なんでもありのエンジニアの溜まり場。",
+      cta: "connpassで参加する",
+      b1T: "ゆるい、が正義", b1D: "難しい上下関係やプレッシャーはゼロ。ノートPCを持ってきて作業するもよし、隣の人と技術談義に花を咲かせるもよし。",
+      b2T: "参加費", b2D: "※ドリンク代のみ。HUBやカフェの実費だけ持ってお越しください。",
+      b3T: "Global", b3D: "English / 中文 OK! 外国人エンジニアも歓迎です。",
+      b4T: "技術スタック", b4D: "特定の言語に縛られません。最近のトレンドから枯れた技術まで。",
+      b5T: "拠点", b5D: "北千住駅周辺（HUB、コワーキング、カフェなど回によって変動）",
+      b6T: "誰でも歓迎", b6D: "初心者・学生・ベテラン、エンジニアなら誰でも大歓迎！",
+      flow: [
+        {t: "14:00", title: "開場", d: "ふらっと集まって好きな席へ。まずは飲み物を確保。"},
+        {t: "14:15", title: "ゆるい自己紹介", d: "強制ではありません。今日やることを軽く共有。"},
+        {t: "14:30", title: "作業 & 交流", d: "集中してコードを書いてもいいし、技術相談してもOK。"},
+        {t: "18:00", title: "中締め", d: "二次会（居酒屋）に行く人も多数。北千住は夜が長い！"}
+      ]
+    },
+    en: {
+      heroBadge: "🟢 Kitasenju Engineer Community",
+      heroDesc: "A chill, strong hub for developers in Kitasenju. Coding, networking, and craft beer — all levels welcome.",
+      cta: "Join on connpass",
+      b1T: "Chill is the Rule", b1D: "Zero pressure. Bring your laptop to work or just hang out and talk tech with new friends.",
+      b2T: "Entrance", b2D: "FREE (Just pay for your own drinks/food at the venue).",
+      b3T: "Global Friendly", b3D: "English / Chinese / Japanese OK! International devs are always here.",
+      b4T: "Tech Stack", b4D: "No specific language required. From AI to legacy systems.",
+      b5T: "Location", b5D: "Around Kitasenju Station (HUB, Co-working space, etc.)",
+      b6T: "All Welcome", b6D: "Beginners, students, and seniors — anyone who loves tech.",
+      flow: [
+        {t: "14:00", title: "Doors Open", d: "Grab a drink and find a comfortable spot."},
+        {t: "14:15", title: "Short Intro", d: "Optional quick hello and share what you're working on."},
+        {t: "14:30", title: "Coding / Networking", d: "Focus on your tasks or chat with other engineers."},
+        {t: "18:00", title: "Wrap up", d: "Networking often continues at a local Izakaya!"}
+      ]
+    }
+  };
+
+  function switchLang(lang, event) {
+    const data = content[lang];
+    document.querySelectorAll('.lang-btn').forEach( btn => btn.classList.remove('active') );
+    document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
+
+    document.getElementById('hero-badge').innerText = data.heroBadge;
+    document.getElementById('hero-desc').innerText = data.heroDesc;
+    document.getElementById('cta-text').innerText = data.cta;
+    document.getElementById('b1-title').innerText = data.b1T;
+    document.getElementById('b1-desc').innerText = data.b1D;
+    document.getElementById('b2-title').innerText = data.b2T;
+    document.getElementById('b2-desc').innerText = data.b2D;
+    document.getElementById('b3-title').innerText = data.b3T;
+    document.getElementById('b3-desc').innerText = data.b3D;
+    document.getElementById('b4-title').innerText = data.b4T;
+    document.getElementById('b4-desc').innerText = data.b4D;
+    document.getElementById('b5-title').innerText = data.b5T;
+    document.getElementById('b5-desc').innerText = data.b5D;
+    document.getElementById('b6-title').innerText = data.b6T;
+    document.getElementById('b6-desc').innerText = data.b6D;
+
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = data.flow.map(item => `
+      <div class="time-card">
+        <div class="time-val">${item.t}</div>
+        <div>
+          <div style="font-weight:bold; font-size:1.1rem;">${item.title}</div>
+          <div style="color:var(--text-dim); font-size:0.9rem;">${item.d}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  // 初期化
+  window.addEventListener('DOMContentLoaded', () => {
+      const defaultBtn = document.querySelector('.lang-btn[data-lang="ja"]');
+      switchLang('ja', defaultBtn);
+  });
+</script>
